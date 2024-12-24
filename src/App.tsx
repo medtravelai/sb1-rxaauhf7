@@ -8,65 +8,91 @@ import { RegisterForm } from './components/auth/RegisterForm';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { WelcomeScreen } from './components/auth/WelcomeScreen';
 import { ProfilePage } from './pages/ProfilePage';
+import { Dashboard } from './components/Dashboard';
+import { Exercise } from './components/Exercise';
+import { Nutrition } from './components/Nutrition';
+import { MoodSleep } from './components/MoodSleep';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
+  console.log('App rendering...');
+  
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-orange-50">
-          <Header />
-          <main className="container mx-auto px-4 py-8">
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-orange-50">
             <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Navigate to="/welcome" replace />} />
+              <Route path="/welcome" element={<WelcomeScreen />} />
               <Route path="/login" element={<LoginForm />} />
               <Route path="/registro" element={<RegisterForm />} />
-              <Route path="/welcome" element={<WelcomeScreen />} />
-              <Route path="/perfil" element={
+              
+              {/* Protected routes */}
+              <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <DailyTip />
-                  <div className="bg-white rounded-lg shadow-lg p-6">
-                    <Dashboard />
+                  <div>
+                    <Header />
+                    <main className="container mx-auto px-4 py-8">
+                      <DailyTip />
+                      <div className="bg-white rounded-lg shadow-lg p-6">
+                        <Dashboard />
+                      </div>
+                    </main>
                   </div>
                 </ProtectedRoute>
               } />
+              
               <Route path="/ejercicio" element={
                 <ProtectedRoute>
-                  <Exercise />
+                  <div>
+                    <Header />
+                    <main className="container mx-auto px-4 py-8">
+                      <Exercise />
+                    </main>
+                  </div>
                 </ProtectedRoute>
               } />
+
               <Route path="/nutricion" element={
                 <ProtectedRoute>
-                  <Nutrition />
+                  <div>
+                    <Header />
+                    <main className="container mx-auto px-4 py-8">
+                      <Nutrition />
+                    </main>
+                  </div>
                 </ProtectedRoute>
               } />
-              <Route path="/estado" element={
+
+              <Route path="/bienestar" element={
                 <ProtectedRoute>
-                  <MoodSleep />
+                  <div>
+                    <Header />
+                    <main className="container mx-auto px-4 py-8">
+                      <MoodSleep />
+                    </main>
+                  </div>
                 </ProtectedRoute>
               } />
-              <Route path="*" element={<Navigate to="/welcome" replace />} />
+
+              <Route path="/perfil" element={
+                <ProtectedRoute>
+                  <div>
+                    <Header />
+                    <main className="container mx-auto px-4 py-8">
+                      <ProfilePage />
+                    </main>
+                  </div>
+                </ProtectedRoute>
+              } />
             </Routes>
-          </main>
-        </div>
-      </Router>
-    </AuthProvider>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
-
-// Placeholder components remain the same
-const Dashboard = () => (
-  <div className="space-y-6">
-    <h1 className="text-3xl font-bold text-orange-800">¡Bienvenido a Amigo!</h1>
-    <p className="text-gray-600">Tu compañero personal para una vida más saludable.</p>
-  </div>
-);
-
-const Exercise = () => <div>Ejercicio Component</div>;
-const Nutrition = () => <div>Nutrición Component</div>;
-const MoodSleep = () => <div>Estado Component</div>;
 
 export default App;

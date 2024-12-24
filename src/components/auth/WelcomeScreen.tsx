@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, Activity, Utensils, Moon } from 'lucide-react';
 
 export function WelcomeScreen() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center bg-gradient-to-b from-orange-50 to-white px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-orange-50 to-white px-4">
       <div className="text-center max-w-2xl">
         <div className="flex justify-center mb-6">
           <Heart className="w-16 h-16 text-orange-600" />
@@ -34,21 +34,25 @@ export function WelcomeScreen() {
         </div>
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
-          <div className="p-6 bg-white rounded-lg shadow-md">
+          <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <Activity className="w-8 h-8 text-orange-600 mb-4" />
             <h3 className="font-bold text-lg mb-2">Seguimiento de Ejercicios</h3>
             <p className="text-gray-600">Registra tus actividades físicas y mantén un estilo de vida activo.</p>
           </div>
-          <div className="p-6 bg-white rounded-lg shadow-md">
+          <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <Utensils className="w-8 h-8 text-orange-600 mb-4" />
             <h3 className="font-bold text-lg mb-2">Control Nutricional</h3>
             <p className="text-gray-600">Mantén un registro de tu alimentación y mejora tus hábitos.</p>
           </div>
-          <div className="p-6 bg-white rounded-lg shadow-md">
+          <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <Moon className="w-8 h-8 text-orange-600 mb-4" />
             <h3 className="font-bold text-lg mb-2">Bienestar Mental</h3>
             <p className="text-gray-600">Monitorea tu estado de ánimo y calidad de sueño.</p>
           </div>
+        </div>
+        
+        <div className="mt-12 text-sm text-gray-500">
+          Al crear una cuenta, aceptas nuestros términos de servicio y política de privacidad.
         </div>
       </div>
     </div>
