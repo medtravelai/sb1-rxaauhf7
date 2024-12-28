@@ -126,21 +126,47 @@ export const Nutrition: React.FC = () => {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const totals = calculateTotalNutrition();
+      if (!user) {
+        alert('Por favor inicia sesión para registrar comidas');
+        return;
+      }
+
+      const totals = calculateTotalNutrition();
+      const foodItemsJson = selectedFoods.map(food => ({
+        name: food.name,
+        portion: food.portion,
+        calories: food.calories,
+        protein: food.protein,
+        carbs: food.carbs,
+        fat: food.fat
+      }));
+
+      try {
         await logMeal({
           user_id: user.id,
           meal_type: mealType,
-          food_items: selectedFoods,
+          food_items: foodItemsJson,
           total_calories: totals.calories
         });
 
         setSelectedFoods([]);
         alert('Comida registrada exitosamente');
+      } catch (error) {
+        console.error('Error logging meal:', error);
+        if (error instanceof Error) {
+          if (error.message.includes('no encontró el usuario') || error.message.includes('verificar el usuario')) {
+            // Try to refresh the page to get a new session
+            window.location.reload();
+            return;
+          }
+          alert(error.message);
+        } else {
+          alert('Error al registrar la comida');
+        }
       }
-    } catch (error) {
-      console.error('Error logging meal:', error);
-      alert('Error al registrar la comida');
+    } catch (authError) {
+      console.error('Auth error:', authError);
+      alert('Error de autenticación. Por favor inicia sesión nuevamente.');
     }
   };
 

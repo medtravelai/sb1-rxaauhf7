@@ -13,7 +13,8 @@ export async function signUp(email: string, password: string, username: string, 
     throw new Error('Este nombre de usuario ya está en uso');
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  // Sign up the user
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -24,14 +25,40 @@ export async function signUp(email: string, password: string, username: string, 
     },
   });
 
-  if (error) {
-    if (error.message.includes('Email already registered')) {
+  if (authError) {
+    if (authError.message.includes('Email already registered')) {
       throw new Error('Este correo electrónico ya está registrado');
     }
-    throw error;
+    throw authError;
   }
 
-  return data;
+  if (!authData.user) {
+    throw new Error('Error al crear el usuario');
+  }
+
+  // Create profile immediately
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .insert({
+      id: authData.user.id,
+      username,
+      full_name: fullName,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+  if (profileError) {
+    console.error('Profile creation error:', profileError);
+    // Try to delete the auth user if profile creation fails
+    try {
+      await supabase.auth.admin.deleteUser(authData.user.id);
+    } catch (deleteError) {
+      console.error('Failed to cleanup auth user after profile creation failed:', deleteError);
+    }
+    throw new Error('Error al crear el perfil');
+  }
+
+  return authData;
 }
 
 export async function signIn(email: string, password: string) {

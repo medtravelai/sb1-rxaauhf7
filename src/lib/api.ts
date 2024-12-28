@@ -66,19 +66,68 @@ export async function updateProfile(userId: string, updates: Partial<Tables['pro
 // Exercise
 export async function logExercise(exerciseData: Omit<Tables['exercise_logs']['Insert'], 'id' | 'created_at'>) {
   try {
-    const { data, error } = await withRetry(() =>
-      supabase
-        .from('exercise_logs')
-        .insert(exerciseData)
-        .select()
-        .single()
-    );
-  
-    if (error) throw new AppError(error.message, 'DATABASE_ERROR', error);
-    if (!data) throw new AppError('Failed to log exercise', 'INSERT_FAILED');
-    
-    return data;
+    // Get current user first
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new AppError('No se encontró el usuario', 'USER_NOT_FOUND');
+    }
+
+    // Verify user ID matches
+    if (user.id !== exerciseData.user_id) {
+      throw new AppError('ID de usuario no válido', 'INVALID_USER');
+    }
+
+    // Check if profile exists
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id);
+
+    if (profileError) {
+      console.error('Profile check error:', profileError);
+      throw new AppError('Error al verificar el usuario', 'DATABASE_ERROR', profileError);
+    }
+
+    // Create profile if it doesn't exist
+    if (!profiles || profiles.length === 0) {
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          username: user.email?.split('@')[0] || 'user',
+          full_name: user.user_metadata?.full_name || '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (createProfileError) {
+        console.error('Profile creation error:', createProfileError);
+        throw new AppError('Error al crear el perfil', 'DATABASE_ERROR', createProfileError);
+      }
+    }
+
+    // Log the exercise
+    const { data: exerciseLog, error: exerciseError } = await supabase
+      .from('exercise_logs')
+      .insert({
+        ...exerciseData,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (exerciseError) {
+      console.error('Exercise logging error:', exerciseError);
+      throw new AppError('Error al guardar el ejercicio', 'DATABASE_ERROR', exerciseError);
+    }
+
+    if (!exerciseLog) {
+      throw new AppError('No se pudo registrar el ejercicio', 'INSERT_FAILED');
+    }
+
+    return exerciseLog;
   } catch (error) {
+    console.error('Error in logExercise:', error);
     throw handleApiError(error);
   }
 }
@@ -105,19 +154,68 @@ export async function getExerciseLogs(userId: string) {
 // Nutrition
 export async function logMeal(mealData: Omit<Tables['nutrition_logs']['Insert'], 'id' | 'created_at'>) {
   try {
-    const { data, error } = await withRetry(() =>
-      supabase
-        .from('nutrition_logs')
-        .insert(mealData)
-        .select()
-        .single()
-    );
-  
-    if (error) throw new AppError(error.message, 'DATABASE_ERROR', error);
-    if (!data) throw new AppError('Failed to log meal', 'INSERT_FAILED');
-    
-    return data;
+    // Get current user first
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new AppError('No se encontró el usuario', 'USER_NOT_FOUND');
+    }
+
+    // Verify user ID matches
+    if (user.id !== mealData.user_id) {
+      throw new AppError('ID de usuario no válido', 'INVALID_USER');
+    }
+
+    // Check if profile exists
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id);
+
+    if (profileError) {
+      console.error('Profile check error:', profileError);
+      throw new AppError('Error al verificar el usuario', 'DATABASE_ERROR', profileError);
+    }
+
+    // Create profile if it doesn't exist
+    if (!profiles || profiles.length === 0) {
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          username: user.email?.split('@')[0] || 'user',
+          full_name: user.user_metadata?.full_name || '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (createProfileError) {
+        console.error('Profile creation error:', createProfileError);
+        throw new AppError('Error al crear el perfil', 'DATABASE_ERROR', createProfileError);
+      }
+    }
+
+    // Log the meal
+    const { data: mealLog, error: mealError } = await supabase
+      .from('nutrition_logs')
+      .insert({
+        ...mealData,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (mealError) {
+      console.error('Meal logging error:', mealError);
+      throw new AppError('Error al guardar la comida', 'DATABASE_ERROR', mealError);
+    }
+
+    if (!mealLog) {
+      throw new AppError('No se pudo registrar la comida', 'INSERT_FAILED');
+    }
+
+    return mealLog;
   } catch (error) {
+    console.error('Error in logMeal:', error);
     throw handleApiError(error);
   }
 }
