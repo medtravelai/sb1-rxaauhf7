@@ -54,7 +54,7 @@ function App() {
                   </div>
                 </ProtectedRoute>
               } />
-
+              
               <Route path="/nutricion" element={
                 <ProtectedRoute>
                   <div>
@@ -65,8 +65,8 @@ function App() {
                   </div>
                 </ProtectedRoute>
               } />
-
-              <Route path="/bienestar" element={
+              
+              <Route path="/estado" element={
                 <ProtectedRoute>
                   <div>
                     <Header />
@@ -76,7 +76,7 @@ function App() {
                   </div>
                 </ProtectedRoute>
               } />
-
+              
               <Route path="/perfil" element={
                 <ProtectedRoute>
                   <div>
@@ -87,6 +87,9 @@ function App() {
                   </div>
                 </ProtectedRoute>
               } />
+
+              {/* Catch-all route */}
+              <Route path="*" element={<Navigate to="/welcome" replace />} />
             </Routes>
           </div>
         </Router>
